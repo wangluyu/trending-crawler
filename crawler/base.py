@@ -1,15 +1,21 @@
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import requests
 from bs4 import BeautifulSoup
 from abc import abstractmethod
+from const.common import Header
 
 class Base(object):
     def __init__(self, url, methed = 'GET', data = None):
         self.url = url
         self.method = methed
         self.data = data
+        self.header = None
         self.trending_list = []
 
     def execute(self):
+        self.setHeader()
         soup = self.request()
         self.parse(soup)
 
@@ -17,20 +23,24 @@ class Base(object):
     def parse(self, soup):
         pass
 
+    def setHeader(self):
+        self.header = Header.DEFAULT
+
     def request(self):
         """
         请求 返回bs对象
         """
         if self.method == 'GET':
-            r = requests.get(self.url, params = self.data)
+            print(self.header)
+            r = requests.get(self.url, params = self.data, headers = self.header)
         elif self.method == 'POST':
-            r = requests.post(self.url, data = self.data)
+            r = requests.post(self.url, data = self.data, headers = self.header)
         else:
             return False
         if r.status_code != 200:
             print (r.reason)
             r.raise_for_status()
-        soup = BeautifulSoup(r.text)
+        soup = BeautifulSoup(r.text, features="lxml")
         return soup
     
     # TODO 数据存redis
