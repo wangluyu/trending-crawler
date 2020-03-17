@@ -3,10 +3,10 @@
 ## Support Trending List
 
     - 微博
+    - 知乎
 
 ## TODO LIST
 
-    - 知乎
     - 豆瓣
     - bilibili
     - facebook
