@@ -1,22 +1,38 @@
 import base
+import json
 from const.message import Message
+
+class BiliExt():
+    def __init__(self):
+        self.coins = 0
+        self.author = ""
+        self.video_review = 0
+        self.play = 0
+    def to_json(self):
+        return {
+            "coins": self.coins,
+            "author": self.author,
+            "video_review": self.video_review,
+            "play" : self.play,
+        }
 
 class Bilibili(base.Base):
     def parse(self, soup):
         hot_list = []
-        print(soup)
-        # tr_list = soup.find("div", id="pl_top_realtimehot").table.tbody.find_all("tr")
-        # for tr in tr_list:
-        #     msg = Message()
-        #     td = tr.find("td", class_="td-02")
-        #     a = td.a
-        #     msg.url = 'https://s.weibo.com/'+a['href']
-        #     msg.title = a.string
-        #     if (td.span != None):
-        #         msg.ext_text = td.span.string
-        #     if (td.img != None):
-        #         msg.ext_img = 'https://s.weibo.com/'+td.img['src']
-        #     self.add_trending(msg)
+        js = soup.find('script', {'type': False}).get_text().lstrip('window.__INITIAL_STATE__=').replace(";(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());", "").strip()
+        js = json.loads(js)
+        for item in js['rankList']:
+            msg = Message()
+            msg.img = item['pic']
+            msg.url = "https://www.bilibili.com/video/av" + item['aid']
+            msg.title = item['title']
+            ext = BiliExt()
+            ext.coins = item['coins']
+            ext.author = item['author']
+            ext.video_review = item['video_review']
+            ext.play = item['play']
+            msg.ext = ext.to_json()
+            self.add_trending(msg)
 
 if __name__ == "__main__":
     url = "https://www.bilibili.com/ranking"
